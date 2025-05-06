@@ -12,6 +12,8 @@ using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 
 using uSync.BackOffice;
+using uSync.BackOffice.Configuration;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.GitEdition;
 internal class uSyncGitNotificationHandler :
@@ -20,13 +22,19 @@ internal class uSyncGitNotificationHandler :
 {
     private readonly uSyncGitService _uSyncGitService;
     private readonly ILogger<uSyncGitNotificationHandler> _logger;
+    private readonly ISyncService _syncService;
+    private readonly ISyncConfigService _syncConfigService;
 
     public uSyncGitNotificationHandler(
         uSyncGitService uSyncGitService,
-        ILogger<uSyncGitNotificationHandler> logger)
+        ILogger<uSyncGitNotificationHandler> logger,
+        ISyncService syncService,
+        ISyncConfigService syncConfigService)
     {
         _uSyncGitService = uSyncGitService;
         _logger = logger;
+        _syncService = syncService;
+        _syncConfigService = syncConfigService;
     }
 
     public async Task HandleAsync(UmbracoApplicationStartingNotification notification, CancellationToken cancellationToken)
@@ -46,7 +54,12 @@ internal class uSyncGitNotificationHandler :
 
             if (await _uSyncGitService.SyncedSinceLastCommitAsync())
             {
-                _logger.LogWarning("[uSync] The uSync commit is different to the git commit, you may need to full sync things back.");
+                _logger.LogWarning("[uSync] The uSync commit is different to the git commit, performing a full import");
+                await _syncService.StartupImportAsync(_syncConfigService.GetFolders(), false,
+                    new SyncHandlerOptions
+                    {
+                        Group = "All"
+                    });
             }
             else
             {
