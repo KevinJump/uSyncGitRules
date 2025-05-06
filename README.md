@@ -19,4 +19,5 @@ Wondering what we could do to have uSync perform actions based on the status of 
 2. [ ] Only perform the import if there have been changes files in the uSync folder since the last sync.
 3. [ ] Look for merge commits, and only do this if there is a merge commit beyond the last imported SHA (so only import after merges)
 4. [ ] Have some fancy rule base that let you work it all out
+5. [ ] Go upstream and workout if there are any uSync commits you haven't pulled down, reach out of the screen and shake you until you sync your repo.
 
