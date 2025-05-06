@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
@@ -16,17 +17,20 @@ internal class uSyncGitNotificationHandler :
     private readonly ILogger<uSyncGitNotificationHandler> _logger;
     private readonly ISyncService _syncService;
     private readonly ISyncConfigService _syncConfigService;
+    private readonly IConfiguration _configuration;
 
     public uSyncGitNotificationHandler(
         uSyncGitService uSyncGitService,
         ILogger<uSyncGitNotificationHandler> logger,
         ISyncService syncService,
-        ISyncConfigService syncConfigService)
+        ISyncConfigService syncConfigService,
+        IConfiguration configuration)
     {
         _uSyncGitService = uSyncGitService;
         _logger = logger;
         _syncService = syncService;
         _syncConfigService = syncConfigService;
+        _configuration = configuration;
     }
 
     public async Task HandleAsync(UmbracoApplicationStartingNotification notification, CancellationToken cancellationToken)
@@ -50,7 +54,7 @@ internal class uSyncGitNotificationHandler :
                 await _syncService.StartupImportAsync(_syncConfigService.GetFolders(), false,
                     new SyncHandlerOptions
                     {
-                        Group = "All"
+                        Group = _configuration.GetValue<string>("uSync:GitSync", "all"),
                     });
             }
             else
