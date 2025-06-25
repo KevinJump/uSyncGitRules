@@ -54,6 +54,7 @@ internal class uSyncGitUnattendedInstallHandler : INotificationAsyncHandler<Runt
 
         if (await _uSyncGitService.HasBranchChanged())
         {
+            _logger.LogWarning("Branch has changed since the last sync -> checking....");
             if (await _uSyncGitService.SyncedSinceLastCommitAsync())
             {
                 _logger.LogWarning("uSync has not been synced since the last git commit, performing a full import.");
