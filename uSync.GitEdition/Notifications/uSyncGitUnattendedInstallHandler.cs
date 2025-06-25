@@ -61,14 +61,13 @@ internal class uSyncGitUnattendedInstallHandler : INotificationAsyncHandler<Runt
             else
             {
                 _logger.LogInformation("uSync is in sync with the git repository, no import needed.");
+                return;
             }
         }
         else
         {
             _logger.LogInformation("uSync branch has not changed, no import needed.");
         }
-
-            return;
 
         foreach(var file in Directory.GetFiles(folder, "Umbraco.sqlite.*"))
         {
@@ -77,7 +76,6 @@ internal class uSyncGitUnattendedInstallHandler : INotificationAsyncHandler<Runt
             _logger.LogInformation("Deleted database file: {File}", file);
 
         }
-
 
         _logger.LogInformation("Handling unattended install notification for uSyncGit.");
 
