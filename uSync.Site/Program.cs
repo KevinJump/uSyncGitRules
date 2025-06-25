@@ -1,6 +1,9 @@
+using uSync.GitEdition;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.CreateUmbracoBuilder()
+    .AdduSyncGit()
     .AddBackOffice()
     .AddWebsite()
     .AddComposers()

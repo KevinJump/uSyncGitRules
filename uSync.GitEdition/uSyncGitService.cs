@@ -2,9 +2,20 @@
 
 using Microsoft.Extensions.Logging;
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
 using uSync.BackOffice.Services;
 
 namespace uSync.GitEdition;
+
+internal class uSyncGitConfig
+{
+    public string? Branch { get; set; }
+    public string? Commit { get; set; }
+}
+
 internal class uSyncGitService
 {
     private const string metaFile = "~/uSync/git.meta";
@@ -21,29 +32,57 @@ internal class uSyncGitService
     private Repository GetRepo() 
         => new Repository(Repository.Discover("."));
 
-    public async Task WriteLastSyncedCommitAsync()
+    public async Task WriteGitStatus()
     {
-        var commit = GetLastCommit();
-        await _fileService.SaveFileAsync(metaFile, commit);
+        var config = new uSyncGitConfig
+        {
+            Branch = GetRepo().Head.FriendlyName,
+            Commit = GetLastCommit()
+        };
+        await _fileService.SaveFileAsync(metaFile, JsonSerializer.Serialize(config));
     }
 
-    public async Task<string> ReadLastSyncedCommitAsync()
+    public async Task<uSyncGitConfig> ReadGitStatus()
     {
-        if (_fileService.FileExists(metaFile) is false) return string.Empty;
-        var commit = await _fileService.LoadContentAsync(metaFile);
-        return commit ?? string.Empty;
+        if (_fileService.FileExists(metaFile) is false) return new();
+        var content = await _fileService.LoadContentAsync(metaFile);
+        
+        if (string.IsNullOrEmpty(content)) return new();
+
+        return JsonSerializer.Deserialize<uSyncGitConfig>(content) 
+            ?? new uSyncGitConfig();
+
     }
 
 
     public async Task<bool> SyncedSinceLastCommitAsync()
     {
-        var LastSyncedCommit = await ReadLastSyncedCommitAsync();
-        if (string.IsNullOrEmpty(LastSyncedCommit)) return false;
+        var config = await ReadGitStatus();
+        if (string.IsNullOrEmpty(config.Commit)) return false;
 
         var lastCommit = GetLastCommit();
 
-        return lastCommit != LastSyncedCommit;
+        return lastCommit != config.Commit;
     }
+
+    private string GetBranchName()
+    {
+        using (var repo = GetRepo())
+        {
+            return repo.Head.FriendlyName;
+        }
+    }
+
+
+    public async Task<bool> HasBranchChanged()
+    {
+        var currentBranch = GetBranchName();
+        var config = await ReadGitStatus();
+
+        if (config.Branch is null) return false;
+        return config.Branch != currentBranch;
+    }
+
 
 
     public string GetLastCommit()

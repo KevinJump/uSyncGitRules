@@ -8,20 +8,20 @@ using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.SyncHandlers.Models;
 
-namespace uSync.GitEdition;
-internal class uSyncGitNotificationHandler :
+namespace uSync.GitEdition.Notifications;
+internal class uSyncGitApplicationStartingHandler :
     INotificationAsyncHandler<UmbracoApplicationStartingNotification>,
     INotificationAsyncHandler<uSyncImportCompletedNotification>
 {
     private readonly uSyncGitService _uSyncGitService;
-    private readonly ILogger<uSyncGitNotificationHandler> _logger;
+    private readonly ILogger<uSyncGitApplicationStartingHandler> _logger;
     private readonly ISyncService _syncService;
     private readonly ISyncConfigService _syncConfigService;
     private readonly IConfiguration _configuration;
 
-    public uSyncGitNotificationHandler(
+    public uSyncGitApplicationStartingHandler(
         uSyncGitService uSyncGitService,
-        ILogger<uSyncGitNotificationHandler> logger,
+        ILogger<uSyncGitApplicationStartingHandler> logger,
         ISyncService syncService,
         ISyncConfigService syncConfigService,
         IConfiguration configuration)
@@ -54,7 +54,7 @@ internal class uSyncGitNotificationHandler :
                 await _syncService.StartupImportAsync(_syncConfigService.GetFolders(), false,
                     new SyncHandlerOptions
                     {
-                        Group = _configuration.GetValue<string>("uSync:GitSync", "all"),
+                        Group = _configuration.GetValue("uSync:GitSync", "all"),
                     });
             }
             else
@@ -68,6 +68,6 @@ internal class uSyncGitNotificationHandler :
     {
         // write the last commit to the meta file
         _logger.LogInformation("[uSync] Writing last commit to meta file.");
-        await _uSyncGitService.WriteLastSyncedCommitAsync();
+        await _uSyncGitService.WriteGitStatus();
     }
 }

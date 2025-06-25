@@ -5,6 +5,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
 
 using uSync.BackOffice;
+using uSync.GitEdition.Notifications;
 
 namespace uSync.GitEdition;
 
@@ -15,7 +16,16 @@ internal class Composer : IComposer
     {
         builder.Services.AddSingleton<uSyncGitService>();
 
-        builder.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, uSyncGitNotificationHandler>();
-        builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncGitNotificationHandler>();
+        // builder.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, uSyncGitApplicationStartingHandler>();
+        builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncGitApplicationStartingHandler>();
+    }
+}
+
+public static class  uSyncGitBootExtensions 
+{
+    public static IUmbracoBuilder AdduSyncGit(this IUmbracoBuilder builder)
+    {
+        builder.AddNotificationAsyncHandler<RuntimeUnattendedInstallNotification, uSyncGitUnattendedInstallHandler>();
+        return builder;
     }
 }
