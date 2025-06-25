@@ -68,6 +68,7 @@ internal class uSyncGitUnattendedInstallHandler : INotificationAsyncHandler<Runt
         else
         {
             _logger.LogInformation("uSync branch has not changed, no import needed.");
+            return;
         }
 
         foreach(var file in Directory.GetFiles(folder, "Umbraco.sqlite.*"))
