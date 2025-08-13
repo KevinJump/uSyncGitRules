@@ -38,9 +38,8 @@ uSyncGitRules/
     └── Program.cs            # Site startup configuration
 ```
 
-## Configuration
-
-Add the following configuration to your `appsettings.json`:
+## Configuration (optional)
+You can control some of the setup in your `appsettings.json`:
 
 ```json
 {
