@@ -29,6 +29,19 @@ internal class uSyncGitService
         _fileService = fileService;
     }
 
+    public bool HasRepo()
+    {
+        try
+        {
+            var repo = Repository.Discover(".");
+            return string.IsNullOrEmpty(repo) || Repository.IsValid(Repository.Discover("."));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private Repository GetRepo() 
         => new Repository(Repository.Discover("."));
 
@@ -65,7 +78,7 @@ internal class uSyncGitService
         return lastCommit != config.Commit;
     }
 
-    private string GetBranchName()
+    public string GetCurrentBranchName()
     {
         using (var repo = GetRepo())
         {
@@ -76,7 +89,7 @@ internal class uSyncGitService
 
     public async Task<bool> HasBranchChanged()
     {
-        var currentBranch = GetBranchName();
+        var currentBranch = GetCurrentBranchName();
         var config = await ReadGitStatus();
 
         if (config.Branch is null) return false;

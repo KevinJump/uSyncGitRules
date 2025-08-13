@@ -35,9 +35,11 @@ internal class uSyncGitApplicationStartingHandler :
 
     public async Task HandleAsync(UmbracoApplicationStartingNotification notification, CancellationToken cancellationToken)
     {
-        // TODO: Check last committed sync data. 
-        // var commit = _uSyncGitService.GetLastCommit();
-        // _logger.LogInformation("Last commit - > {commit}", commit);
+        if (_uSyncGitService.HasRepo() is false)
+        {
+            _logger.LogWarning("[uSync] No git repository found. Skipping startup sync.");
+            return;
+        }
 
 
         if (_uSyncGitService.IsRepoDirty())
